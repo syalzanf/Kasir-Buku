@@ -1,0 +1,280 @@
+<%- include ('layout/header') %>
+<%- include ('layout/nav') %>
+<head>
+    <style>
+            
+        /* CSS untuk styling tabel data buku */
+        .keranjang-table {
+            width: 100%;
+            border: 1px solid black;
+            border-collapse: collapse;
+            /* Tambahkan gaya lain sesuai kebutuhan Anda */
+        }
+
+        .keranjang-table th,
+        .keranjang-table td {
+            border: 1px solid black;    
+            padding: 8px;
+            text-align: left;
+        }
+
+        .keranjang-table th {
+            background-color: #333;
+            color: #fff;
+            /* Gaya untuk header kolom */
+        }
+
+        .keranjang-table tr:nth-child(even) {
+            background-color: #f2f2f2;
+            /* Gaya untuk baris genap */
+        }
+
+        .keranjang-table tr:nth-child(odd) {
+            background-color: #ffffff;
+            /* Gaya untuk baris ganjil */
+        }
+        .input-container {
+        display: block;
+        width: 100%;
+    }
+
+    .input-container input {
+        width: 50%;
+        margin-right: 1%;
+    }
+
+            /* Mengatur label dan input di kolom "Judul," "Stok," dan "Harga Pokok" */
+            .column-label {
+            font-weight: bold;
+        }
+
+        .column-input {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .column-input input {
+            flex: 1;
+            margin-right: 5px; /* Tambahkan jarak antara input */
+        }
+    </style>
+</head>
+
+            <div class="content">
+                <!-- Form Penambahan Data Buku -->
+                <h2>Penjualan</h2>
+                <form action="" method="POST">
+                    <table>
+                        <tr>
+                            <td>Kode Penjualan: </td>
+                            <td><%= kodeTransaksi %></td>
+                        </tr>
+                        <tr>
+                            <td>Tanggal Penjualan:</td>
+                            <td><input type="date" name="tglJual" required></td>
+                        </tr>
+                    <table>
+                </form><br>
+
+                <form action="/transaksi/add" method="POST">    
+                <table>
+                    <tr>
+                        <th>Kode Buku</th>
+                        <th>Judul</th>
+                        <th>Stok</th>
+                        <th>Harga Beli</th>
+                        <th>Harga Jual</th>
+                        <th>Jumlah Beli</th>
+                        <!-- <th>Sisa Stok</th> -->
+                        <!--<th>Sub Total</th>-->
+                    </tr>
+                    <tr>
+                        <td><input type="text" name="kodeBuku" id="kodeBukuInput" required oninput="getBookInfo()"></td>
+                        
+                      
+                            <td><input type="text" name="judul" id="judulInput" readonly></td>
+                            <td><input type="text" name="stok" id="stokInput" readonly></td>
+                            <td><input type="text" name="hargaPokok" id="hargaPokokInput" readonly></td>
+                        
+                        <td>
+                            <input type="text" name="hargaJual" id="hargaJualInput" readonly>
+                        </td>
+                        <td>
+                            <input type="number" name="jmlBeli" required> </td>
+                            <!-- <td><input type="text" name="sisaStok" id="sisaStokInput" readonly></td> -->
+                       
+                        <!--<td><input type="text" name="subTotal" id="subTotalInput" readonly></td>>-->
+                    </tr>
+                </table>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <button type="submit" name="simpanKeranjang" value="simpan" required>Simpan ke Keranjang</button>
+                </td>
+            </tr>
+        </table><br>
+    </form>
+    
+
+    
+     <!-- Tabel Keranjang -->
+        <table class="keranjang-table" style="width:100%">
+            <tr>
+                <th>Kode Buku</th>
+                <th>Judul Buku</th>
+                <th>Harga</th>
+                <th>QTY</th>
+                <th>Total</th>
+            </tr>
+            <% for (const item of keranjang) { %>
+              <tr>
+                <td><%= item.kodeBuku %></td>
+                <td><%= item.judul %></td>
+                <td><%= item.hargaJual %></td>
+                <td><%= item.jumlahBeli %></td>
+                <td><%= item.subTotal %></td>
+              </tr>
+            <% } %>
+        </table>
+
+        <h2>Total Harga Pembelian</h2>
+        <p>Total: <%= total %></p>
+
+        <form action="/transaksi/bayar" method="POST">
+          <table>
+            <!-- Kolom Total Pembelian -->
+            <tr>
+              <td>Total Pembelian: </td>
+              <td><input type="text" name="totalPembelian" id="totalPembelian" value="<%= total %>" readonly></td>
+            </tr>
+        
+            <!-- Kolom Jumlah Pembayaran -->
+            <tr>
+              <td>Jumlah Pembayaran:</td>
+              <td><input type="number" name="jumlahPembayaran" id="jumlahPembayaran" required></td>
+            </tr>
+        
+            <!-- Kolom Kembalian -->
+            <tr>
+              <td>Kembalian:</td>
+              <td><input type="text" name="kembalian" id="kembalian" readonly></td>
+            </tr>
+            
+            <tr>
+              <td colspan="2">
+                <form action="/transaksi/simpan" method="POST">
+                  <input type="hidden" name="dataTransaksi" >
+                  <button type="submit">Simpan Transaksi</button>
+                </form>
+              </td>
+            </tr>
+          </table>
+        </form>
+        
+</div>
+
+<!-- Form Pembayaran -->
+
+<%- include ('layout/footer') %>
+
+<script>
+    async function getBookInfo() {
+      const kodeBukuInput = document.getElementById('kodeBukuInput');
+      const judulInput = document.getElementById('judulInput');
+      const stokInput = document.getElementById('stokInput');
+      const hargaPokokInput = document.getElementById('hargaPokokInput');
+      const hargaJualInput = document.getElementById('hargaJualInput');
+      // const sisaStokInput = document.getElementById('sisaStokInput');
+      // const subTotalInput = document.getElementById('subTotalInput');
+  
+      const kodeBuku = kodeBukuInput.value;
+  
+      try {
+        const response = await fetch(`/getBookInfo/${kodeBuku}`);
+        const data = await response.json();
+  
+        if (data.error) {
+          judulInput.value = '';
+          stokInput.value = '';
+          hargaPokokInput.value = '';
+          hargaJualInput.value = '';
+          // sisaStokInput.value = '';
+          // subTotalInput.value = '';
+          alert(data.error); // Show an alert with the error message
+        } else {
+          judulInput.value = data.judul;
+          stokInput.value = data.stok;
+          hargaPokokInput.value = data.hrg_pokok;
+          hargaJualInput.value = data.hrg_jual;
+        }
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    }
+
+//   // Fungsi untuk menghitung dan memperbarui sisa stok
+//   function updateSisaStok() {
+//     const jmlBeliInput = document.getElementsByName('jmlBeli')[0];
+//     const stokInput = document.getElementById('stokInput');
+//     const sisaStokInput = document.getElementById('sisaStokInput');
+
+//     const jmlBeli = parseInt(jmlBeliInput.value);
+//     const stok = parseInt(stokInput.value);
+
+//     if (!isNaN(jmlBeli) && !isNaN(stok)) {
+//       const sisaStok = stok - jmlBeli;
+//       sisaStokInput.value = sisaStok;
+//     } else {
+//       sisaStokInput.value = '';
+//     }
+//   }
+
+//  // Fungsi untuk menghitung dan menampilkan subTotal
+//  function updateSubTotal() {
+//     const hargaJualInput = document.getElementById('hargaJualInput');
+//     const jmlBeliInput = document.getElementsByName('jmlBeli')[0];
+//     const subTotalInput = document.getElementById('subTotalInput');
+
+//     const hargaJual = parseFloat(hargaJualInput.value);
+//     const jmlBeli = parseInt(jmlBeliInput.value);
+
+//     if (!isNaN(hargaJual) && !isNaN(jmlBeli)) {
+//       const subTotal = hargaJual * jmlBeli;
+//       subTotalInput.value = subTotal.toFixed(2);
+//       hitungKembalian(); // Hitung kembalian setiap kali subTotal diperbarui
+//     } else {
+//       subTotalInput.value = '';
+//     }
+//   }
+
+  // Fungsi untuk menghitung dan menampilkan kembalian
+  function hitungKembalian() {
+    const totalPembelianInput = document.getElementById('totalPembelian');
+    const jumlahPembayaranInput = document.getElementById('jumlahPembayaran');
+    const kembalianInput = document.getElementById('kembalian');
+
+    const totalPembelian = parseFloat(totalPembelianInput.value);
+    const jumlahPembayaran = parseFloat(jumlahPembayaranInput.value);
+
+    if (!isNaN(totalPembelian) && !isNaN(jumlahPembayaran)) {
+      const kembalian = jumlahPembayaran - totalPembelian;
+      kembalianInput.value = kembalian.toFixed(2);
+    } else {
+      kembalianInput.value = '';
+    }
+  }
+
+
+  // Menambahkan event listener ke input jumlah pembayaran
+  const jumlahPembayaranInput = document.getElementById('jumlahPembayaran');
+  jumlahPembayaranInput.addEventListener('input', hitungKembalian);
+
+  // // Menambahkan event listener ke input jumlah beli
+  // const jmlBeliInput = document.getElementsByName('jmlBeli')[0];
+  // jmlBeliInput.addEventListener('input', updateSisaStok, updateSubTotal);
+ 
+  </script>
+
+
+
+

@@ -1,0 +1,16 @@
+<%- include ('layout/header') %>
+<%- include ('layout/nav') %>
+
+<div class="content">
+    <h2>Tambah Stok Buku</h2>
+    <form action="/dataBuku/tambahStok/<%= kodeBuku %>" method="POST">
+        <% if (kodeBuku) { %>
+            <input type="hidden" name="kodeBukuStok" value="<%= kodeBuku %>">
+          <% } %>
+        <label for="jumlahMasuk">Jumlah Masuk:</label>
+        <input type="number" name="jumlahMasuk" required>
+        <button type="submit">Tambah Stok</button>
+    </form>
+</div>
+
+<%- include ('layout/footer') %>
